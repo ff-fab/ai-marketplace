@@ -1,6 +1,6 @@
 {
   "name": "writing",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Writing and communication helpers (starter plugin).",
   "author": {
     "name": "Fabian Koerner",
@@ -10,5 +10,9 @@
   "homepage": "https://github.com/ff-fab/ai-marketplace",
   "repository": "https://github.com/ff-fab/ai-marketplace",
   "category": "writing",
-  "keywords": ["writing", "editing", "communication"]
+  "keywords": [
+    "writing",
+    "editing",
+    "communication"
+  ]
 }
