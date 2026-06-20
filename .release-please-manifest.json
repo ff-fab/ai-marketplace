@@ -1,6 +1,6 @@
 {
   "plugins/productivity": "0.1.0",
-  "plugins/engineering": "0.1.0",
+  "plugins/engineering": "0.2.0",
   "plugins/writing": "0.1.0",
   "plugins/meta": "0.1.0"
 }
