@@ -5,7 +5,7 @@
  */
 
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { basename, dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -73,7 +73,7 @@ for (const name of existsSync(pluginsDir) ? readdirSync(pluginsDir) : []) {
 // 3. Skills: frontmatter name must match directory name.
 for (const file of walk(pluginsDir)) {
   if (!file.endsWith("SKILL.md")) continue;
-  const dirName = relative(ROOT, dirname(file)).split("/").pop();
+  const dirName = basename(dirname(file));
   const m = readFileSync(file, "utf8").match(/^---\n([\s\S]*?)\n---/);
   const nameLine = m && m[1].match(/^name:\s*(.+)$/m);
   if (!nameLine) fail(`SKILL.md missing frontmatter 'name': ${relative(ROOT, file)}`);
@@ -87,16 +87,40 @@ const notices = existsSync(noticesPath) ? readFileSync(noticesPath, "utf8") : ""
 if (!notices) fail("THIRD_PARTY_NOTICES.md is missing");
 for (const file of walk(pluginsDir)) {
   if (file.endsWith("/LICENSE") || file.endsWith("\\LICENSE")) {
-    const dir = relative(ROOT, dirname(file));
+    const dir = relative(ROOT, dirname(file)).split(sep).join("/");
     if (!notices.includes(dir))
       fail(`Vendored dir not documented in THIRD_PARTY_NOTICES.md: ${dir}`);
   }
 }
 
 // 5. Secret hygiene: .mcp.json may only reference secrets via ${ENV_VAR} placeholders.
+const PLACEHOLDER = /^\$\{[A-Za-z_][A-Za-z0-9_]*\}$/;
+
+// Any string value inside an `env` map must be a pure ${ENV_VAR} placeholder.
+function checkMcpEnv(node, file) {
+  if (!node || typeof node !== "object") return;
+  for (const [key, val] of Object.entries(node)) {
+    if (key === "env" && val && typeof val === "object" && !Array.isArray(val)) {
+      for (const [k, v] of Object.entries(val)) {
+        if (typeof v === "string" && !PLACEHOLDER.test(v))
+          fail(`${relative(ROOT, file)}: env.${k} must be a \${ENV_VAR} placeholder, not a literal value`);
+      }
+    } else if (val && typeof val === "object") {
+      checkMcpEnv(val, file);
+    }
+  }
+}
+
 for (const file of walk(ROOT)) {
   if (!file.endsWith(".mcp.json")) continue;
   const text = readFileSync(file, "utf8");
+  // Enforce the documented placeholder-only policy for env values.
+  try {
+    checkMcpEnv(JSON.parse(text), file);
+  } catch (e) {
+    fail(`Invalid JSON: ${relative(ROOT, file)} — ${e.message}`);
+  }
+  // Backstop: catch obvious credential literals anywhere in the file.
   const suspicious = text.match(/(sk-[A-Za-z0-9]{16,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16})/);
   if (suspicious) fail(`Possible committed secret in ${relative(ROOT, file)}: ${suspicious[0].slice(0, 8)}…`);
 }

@@ -65,6 +65,11 @@ function parseFrontmatter(md) {
 const marketplacePath = join(ROOT, ".claude-plugin", "marketplace.json");
 const marketplace = readJson(marketplacePath);
 
+if (!Array.isArray(marketplace.plugins)) {
+  console.error(`${relative(ROOT, marketplacePath)}: "plugins" must be an array.`);
+  process.exit(1);
+}
+
 for (const entry of marketplace.plugins) {
   const pluginDir = join(ROOT, entry.source.replace(/^\.\//, ""));
   const manifestPath = join(pluginDir, ".claude-plugin", "plugin.json");

@@ -14,7 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
+          # On push and same-repo PRs, check out the actual branch so we can commit
+          # drift back. On fork PRs, fall back to the default merge ref (check-only).
+          ref: ${{ (github.event_name == 'push' && github.ref_name) || (github.event.pull_request.head.repo.full_name == github.repository && github.head_ref) || '' }}
 
       - uses: actions/setup-node@v4
         with:
@@ -24,10 +26,10 @@ jobs:
       - name: Generate mirrors and sync registry
         run: node scripts/generate.mjs
 
-      # Auto-commit any drift back to the branch (Nagell-style auto-sync). This keeps
-      # release-please version-bump PRs and hand edits in sync without manual steps.
-      - name: Commit drift
-        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+      # On push (incl. release-please version-bump branches), auto-commit any drift back
+      # to the branch so the registry/mirrors stay in sync without manual steps.
+      - name: Commit drift (push events)
+        if: github.event_name == 'push'
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
@@ -38,6 +40,17 @@ jobs:
           else
             echo "No drift."
           fi
+
+      # On pull requests, don't push from CI — just fail if generated files are stale.
+      - name: Fail on drift (pull requests)
+        if: github.event_name == 'pull_request'
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Generated files are out of sync. Run: node scripts/generate.mjs" >&2
+            git --no-pager diff
+            exit 1
+          fi
+          echo "No drift."
 
       # Structural + license validation (does not modify files).
       - name: Validate structure and license hygiene
