@@ -1,6 +1,6 @@
 {
   "name": "productivity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Thinking and planning tools: relentless plan grilling and design interviews.",
   "author": {
     "name": "Fabian Koerner",
@@ -10,5 +10,10 @@
   "homepage": "https://github.com/ff-fab/ai-marketplace",
   "repository": "https://github.com/ff-fab/ai-marketplace",
   "category": "productivity",
-  "keywords": ["productivity", "planning", "interview", "grilling"]
+  "keywords": [
+    "productivity",
+    "planning",
+    "interview",
+    "grilling"
+  ]
 }
