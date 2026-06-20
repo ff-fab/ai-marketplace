@@ -1,0 +1,44 @@
+name: validate
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Regenerate .github mirrors + sync the registry from the plugin manifests.
+      - name: Generate mirrors and sync registry
+        run: node scripts/generate.mjs
+
+      # Auto-commit any drift back to the branch (Nagell-style auto-sync). This keeps
+      # release-please version-bump PRs and hand edits in sync without manual steps.
+      - name: Commit drift
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: sync generated marketplace files [skip ci]"
+            git push
+          else
+            echo "No drift."
+          fi
+
+      # Structural + license validation (does not modify files).
+      - name: Validate structure and license hygiene
+        run: node scripts/validate.mjs

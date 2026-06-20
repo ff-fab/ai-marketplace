@@ -1,0 +1,83 @@
+{
+  "name": "ff-fab-marketplace",
+  "owner": {
+    "name": "Fabian Koerner",
+    "email": "mail@fabiankoerner.com"
+  },
+  "metadata": {
+    "description": "Fabian Koerner's personal cross-tool AI plugin marketplace for Claude Code, GitHub Copilot CLI, and VS Code Copilot.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "productivity",
+      "source": "./plugins/productivity",
+      "description": "Thinking and planning tools: relentless plan grilling and design interviews.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fabian Koerner",
+        "email": "mail@fabiankoerner.com"
+      },
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "productivity",
+        "planning",
+        "interview",
+        "grilling"
+      ]
+    },
+    {
+      "name": "engineering",
+      "source": "./plugins/engineering",
+      "description": "Software engineering helpers: design grilling with docs and domain modeling.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fabian Koerner",
+        "email": "mail@fabiankoerner.com"
+      },
+      "license": "MIT",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "domain-modeling",
+        "adr",
+        "design"
+      ]
+    },
+    {
+      "name": "writing",
+      "source": "./plugins/writing",
+      "description": "Writing and communication helpers (starter plugin).",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fabian Koerner",
+        "email": "mail@fabiankoerner.com"
+      },
+      "license": "MIT",
+      "category": "writing",
+      "keywords": [
+        "writing",
+        "editing",
+        "communication"
+      ]
+    },
+    {
+      "name": "meta",
+      "source": "./plugins/meta",
+      "description": "Plugin authoring toolkit: scaffolding commands for skills, agents, and commands.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Fabian Koerner",
+        "email": "mail@fabiankoerner.com"
+      },
+      "license": "MIT",
+      "category": "meta",
+      "keywords": [
+        "meta",
+        "scaffolding",
+        "plugin-development"
+      ]
+    }
+  ]
+}
